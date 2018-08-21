@@ -31,6 +31,55 @@ class message_output_mywarwick extends message_output {
      * @param object $eventdata the event data submitted by the message sender plus $eventdata->savedmessageid
      */
     function send_message($eventdata) {
+
+        global $CFG, $DB;
+        require_once($CFG->libdir . '/filelib.php');
+
+        // Skip any messaging suspended and deleted users.
+        if ($eventdata->userto->auth === 'nologin' or
+          $eventdata->userto->suspended or
+          $eventdata->userto->deleted) {
+          return true;
+        }
+
+        // If username is empty we try to retrieve it, since it's required to generate the siteid.
+        if (empty($eventdata->userto->username)) {
+          $eventdata->userto->username = $DB->get_field('user', 'username', array('id' => $eventdata->userto->id));
+        }
+
+        // Construct the alert
+        $alert = new stdClass;
+        $alert->type = $type;
+        $alert->title = $title;
+        $alert->text = $text;
+        $alert->url = $url;
+        //$notification->tags = array();
+        //$notification->generated_at = now();
+
+        $recipients = new stdClass;
+        $recipients->users = $users;
+        //$recipients->groups = array();
+
+        $alert->recipients = $recipients;
+
+        $postdata = json_encode($alert);
+
+        // Sending the message to the device.
+        $serverurl = $CFG->mywarwickurl;
+        $header = array('Accept: application/json',
+          'Content-Length: ' . strlen($postdata));
+
+        $curl = new curl;
+        $curl->setHeader($header);
+
+        // JSON POST raw body request.
+        $resp = $curl->post($serverurl, $postdata);
+
+        $info = $curl->get_info();
+        if( $info['http_code'] == '200' ) {
+          $jdata = json_decode($resp, false);
+        }
+
         return true;
     }
 
