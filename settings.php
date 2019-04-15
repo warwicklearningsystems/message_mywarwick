@@ -30,7 +30,7 @@ if ($ADMIN->fulltree) {
   $settings->add(new admin_setting_configtext('mywarwickusername',
     get_string('mywarwickusername', 'message_mywarwick'),
     get_string('mywarwickusername_config', 'message_mywarwick'), '', PARAM_TEXT));
-  $settings->add(new admin_setting_configtext('mywarwickuserpassword',
+  $settings->add(new admin_setting_configpasswordunmask('mywarwickuserpassword',
     get_string('mywarwickpassword', 'message_mywarwick'),
-    get_string('mywarwickpassword_config', 'message_mywarwick'), '', PARAM_ALPHANUMEXT));
+    get_string('mywarwickpassword_config', 'message_mywarwick'), '', PARAM_TEXT));
 }
