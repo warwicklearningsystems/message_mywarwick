@@ -42,42 +42,51 @@ class message_output_mywarwick extends message_output {
           return true;
         }
 
+        $users = array();
+
         // If username is empty we try to retrieve it, since it's required to generate the siteid.
         if (empty($eventdata->userto->username)) {
           $eventdata->userto->username = $DB->get_field('user', 'username', array('id' => $eventdata->userto->id));
         }
 
-        // Construct the alert
-        $alert = new stdClass;
-        $alert->type = $type;
-        $alert->title = $title;
-        $alert->text = $text;
-        $alert->url = $url;
-        //$notification->tags = array();
-        //$notification->generated_at = now();
+        $users[] = $eventdata->userto->username;
 
+        // Build recipients list
         $recipients = new stdClass;
         $recipients->users = $users;
         //$recipients->groups = array();
 
+        // Construct the alert
+        $alert = new stdClass;
+        $alert->type = $eventdata->component . " " . $eventdata->name;
+        $alert->title = $eventdata->subject;
+        $alert->text = $eventdata->smallmessage;
+        $alert->url = '';
+        //$alert->tags = array();
+        //$alert->generated_at = now();
         $alert->recipients = $recipients;
 
+        // Encode alert and construct message to send
         $postdata = json_encode($alert);
-
-        // Sending the message to the device.
-        $serverurl = $CFG->mywarwickurl;
-        $header = array('Accept: application/json',
+        $header = array(
+          'Content-Type: application/json',
           'Content-Length: ' . strlen($postdata));
 
+        $serverurl = $CFG->mywarwickurl;
         $curl = new curl;
         $curl->setHeader($header);
 
-        // JSON POST raw body request.
+        $curl->setopt( array(
+          'CURLOPT_USERPWD' => $CFG->mywarwickusername . ":" . $CFG->mywarwickuserpassword)
+        );
+
         $resp = $curl->post($serverurl, $postdata);
 
         $info = $curl->get_info();
         if( $info['http_code'] == '200' ) {
           $jdata = json_decode($resp, false);
+        } else {
+          //debugging('FAILED TO MY WARWICK' . $resp, DEBUG_MINIMAL);
         }
 
         return true;
