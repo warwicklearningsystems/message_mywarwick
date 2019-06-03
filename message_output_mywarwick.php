@@ -61,7 +61,8 @@ class message_output_mywarwick extends message_output {
         $alert->type = $eventdata->component . " " . $eventdata->name;
         $alert->title = $eventdata->subject;
         $alert->text = $eventdata->smallmessage;
-        $alert->url = '';
+
+        $alert->url = !empty( $eventdata->contexturl ) ? ( is_object( $eventdata->contexturl ) ? $eventdata->contexturl->out() : $eventdata->contexturl ) : '';
         //$alert->tags = array();
         //$alert->generated_at = now();
         $alert->recipients = $recipients;
