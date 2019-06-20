@@ -37,9 +37,9 @@ class message_output_mywarwick extends message_output {
 
         // Skip any messaging suspended and deleted users.
         if ($eventdata->userto->auth === 'nologin' or
-          $eventdata->userto->suspended or
-          $eventdata->userto->deleted) {
-          return true;
+            $eventdata->userto->suspended or
+            $eventdata->userto->deleted) {
+            return true;
         }
 
         $users = array();
@@ -84,10 +84,21 @@ class message_output_mywarwick extends message_output {
         $resp = $curl->post($serverurl, $postdata);
 
         $info = $curl->get_info();
-        if( $info['http_code'] == '200' ) {
-          $jdata = json_decode($resp, false);
-        } else {
-          //debugging('FAILED TO MY WARWICK' . $resp, DEBUG_MINIMAL);
+        if( !( '200' == $info[ 'http_code' ] ) ) {
+            $errorText = $info[ 'http_code' ] ? 'Server returned HTTP Status: '.$info[ 'http_code' ] : '';
+            debugging( 'FAILED TO MY WARWICK. '.$errorText, DEBUG_DEVELOPER);
+
+            $event = \message_mywarwick\event\alert_failed::create(array(
+                'context' => context_system::instance(),
+                'userid' => $eventdata->userto->id,
+                'other' => array(
+                    'title' => $alert->title,
+                    'text' => $alert->text,
+                    'errortext' => $errorText
+                )
+            ));
+
+            $event->trigger();
         }
 
         return true;

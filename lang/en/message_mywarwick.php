@@ -31,3 +31,4 @@ $string['mywarwickusername'] = 'Username';
 $string['mywarwickusername_config'] = 'Username to push messages to My Warwick';
 $string['mywarwickpassword'] = 'Password';
 $string['mywarwickpassword_config'] = 'Password to push messages to My Warwick';
+$string['alertfailed'] = 'My Warwick alert send failed';
