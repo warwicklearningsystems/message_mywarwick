@@ -84,7 +84,7 @@ class message_output_mywarwick extends message_output {
         $resp = $curl->post($serverurl, $postdata);
 
         $info = $curl->get_info();
-        if( !( '200' == $info[ 'http_code' ] ) ) {
+        if( !in_array( $info[ 'http_code' ], [ '200', '201', '202' ] ) ){
             $errorText = $info[ 'http_code' ] ? 'Server returned HTTP Status: '.$info[ 'http_code' ] : '';
             debugging( 'FAILED TO MY WARWICK. '.$errorText, DEBUG_DEVELOPER);
 
